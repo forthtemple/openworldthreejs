@@ -28,6 +28,13 @@ If you open /models/secondtemple/temple/temple.blend notice the multiple meshes.
 ![alt tag](http://secondtemple.org/screenshots/wallsurface.jpg) 
 
 A surface mesh will be intersected by the open world framework to determine the ground. Walls are also detected to stop players walking through walls. Also notice the units of distance in the blender model are around about 1 meter. Also Z is up. Also some meshes are hidden in order to reduce the size. To export the temple.blend model to obj, select all the meshes you wish to export (will exclude the hidden ones) and then export the obj and then click on 'selection only' to only export the selected meshes.
+[alt tag](http://secondtemple.org/screenshots/exportobj.jpg) 
+
+To export a mesh such as /models/secondtemple/priest/priest.blend to json make sure the Blender export io_three is placed under the directory Blender\2.xx\scripts\addons. Exporting to json can be fiddly where you must first select the mesh you wish to export such as:
+
+[alt tag](http://secondtemple.org/screenshots/jsonselectmesh.jpg) 
+
+And then you have to specify all the correct flags once you export. These are the ones that work:
 
 
 mention hidden
