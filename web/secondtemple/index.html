@@ -71,7 +71,7 @@
 				<img src="icons/config.png"  id="config" style="margin-right:5px" />
 				<div style="display:none" id="configdiv">
 					<a href="http://www.forthtemple.com">Forth Temple</a><br>
-					Get it on <a href="mmm">Github</a>
+					Get it on <a href="https://github.com/forthtemple/openworldthreejs">Github</a>
 				</div>
 				<div   style="display:none" id="fly">
 					<br><br>
@@ -355,7 +355,7 @@
 						// Place the camera in world coords at 8.59, 1.31 on the surface
 						space.worldToLocalSurfaceObj(camera,8.59,1.31,0.15);
 						// Initially look at the temple
-						camera.lookAt(space.WorldToLocal(0,1.31,0));
+						camera.lookAt(space.worldToLocal(0,1.31,0));
 						
 						joystick = new VirtualJoystick({
 							mouseSupport	: true,
@@ -872,8 +872,8 @@
 						mixershofar2.update(frameTime );
 
 					} 
-
-					joystick.update();
+					if (joystick)
+						joystick.update();
 					osound.update();
 						
 					effectController.inclination+=frameTime*0.01;
