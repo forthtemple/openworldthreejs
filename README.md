@@ -21,7 +21,11 @@ Outside world coordinates and the controller, everything else such as loading mo
 
 **Using blender models**
 
-for non actors convert to obj so that can have multi texture
+All the models in the demos are created using Blender. There are included in the repository. In the demo models are exported as wavefront 'obj' models since they allow for multiple texturing. For actors they are exported from Blender as json models since they include animations which json allows for but obj does not.
+
+If you open /models/secondtemple/temple/temple.blend
+
+, or non actors convert to obj so that can have multi texture
 	-for main world
 		-tend to use a lot of repeating textures
 		-export selected for hidden
