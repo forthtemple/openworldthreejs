@@ -1,0 +1,941 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Second Temple</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				color: #000;
+				font-family:Arial;
+				font-size:18px;
+				text-align:center;
+				background-color: #fff;
+				margin: 0px;
+				overflow: hidden;
+			}
+
+			#info {
+				position: absolute;
+				padding: 0px;
+				width: 100%;
+				text-align: right;
+				color: grey;
+			}
+
+			a { color: #bfbfbf; }
+			
+			#progress {
+				color:grey;
+				top:10em;
+				width: 100%;
+				font-family:Arial;
+				position:absolute;
+				z-index:100;
+				text-align: center;
+				display:none;
+			}
+
+			.shadow {
+				-moz-box-shadow: 0px 0px 5px #000;
+				-webkit-box-shadow: 0px 0px 5px #000;
+				box-shadow: 0px 0px 5px #000;
+			}
+
+			#progressbar {
+				text-align: center;
+				background: white;
+				width: 250px;
+				height: 10px;
+			}
+
+			#bar {
+				background:grey;
+				width:50px;
+				height:10px;
+				margin-top:10px;
+			}			
+			
+		</style>
+	</head>
+
+	<body>
+		<div id="info">
+			<b><span dir="rtl" xml:lang="he" lang="he">בֵּית־הַמִּקְדָּשׁ הַשֵּׁנִי</span></b><br>
+			<span id="info2">
+			<b>Second Temple</b><br>
+			Use arrows to move<br>
+			Mouse for camera
+			</span>
+			<div> 
+				<img src="icons/config.png"  id="config" style="margin-right:5px" />
+				<div style="display:none" id="configdiv">
+					<a href="http://www.forthtemple.com">Forth Temple</a><br>
+					Get it on <a href="mmm">Github</a>
+				</div>
+				<div   style="display:none" id="fly">
+					<br><br>
+					<img src="icons/arrow.png"  id="flyup"  /><br>
+					<img src="icons/wings.png"  iid="fly" /><br>
+					<img src="icons/arrow.png"  id="flydown"  style="-moz-transform: scaleY(-1); -o-transform: scaleY(-1);  -webkit-transform: scaleY(-1); transform: scaleY(-1);  filter: FlipV;   -ms-filter: 'FlipV';"/>
+				</div>
+			</div>
+		</div>
+		<div id="progress">
+			<span id="message" >Loading ...</span>
+
+			<center>
+				<div id="progressbar" class="shadow"><div id="bar" class="shadow"></div></div>
+			</center>
+		</div>
+		
+		
+        <script src="http://threejs.org/build/three.min.js"></script>
+
+		<script src='http://threejs.org/examples/js/Gyroscope.js'></script>
+		<script src="http://threejs.org/examples/js/loaders/MTLLoader.js"></script>
+		<script src="http://threejs.org/examples/js/loaders/OBJLoader.js"></script>
+	
+		<script src="openworldjs/VolumetricFire.js"></script>
+		<script src="openworldjs/OpenWorld.js"></script>
+	
+		<script src="http://threejs.org/examples/js/SkyShader.js"></script>
+		<script src='http://threejs.org/examples/js/Detector.js'></script>
+		<script src='http://threejs.org/examples/js/libs/stats.min.js'></script>
+
+
+		<script>
+
+			var system=new OPENWORLD.System();
+			var ismobile=system.detectMobile();
+			if (ismobile) {
+				document.getElementById('info2').innerHTML="<b>Second Temple</b><br>Use virtual joystick<br>to move<br>Touch screen to turn";
+			} else {
+			}
+			var omath=new OPENWORLD.Math();
+			var osound=new OPENWORLD.Sound();
+			var otouchscreen;
+			
+			var fog=false;
+			
+			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+
+			var SCREEN_WIDTH = window.innerWidth;
+			var SCREEN_HEIGHT = window.innerHeight;
+
+			var container,  scene, renderer;
+			var camera;
+			var cameraoffset=0.15;
+			
+			var cameraControls;
+
+			var sky, sunSphere;
+
+			var effectController;
+
+		    var mouse = new THREE.Vector2();
+
+			var clock = new THREE.Clock();
+			
+			var joystick;
+
+			var targetRotationX = 0;
+			var targetRotationY = 0;
+
+			var mouseX = 0;
+			var mouseY = 0;
+			var fire;
+
+
+			var light;
+			var listener;
+			
+			var mixershofar;
+			var mixershofar2;
+			var shofar;
+			var shofar2;
+			var lightshofar;
+			
+			var priest;
+			var mixerpriest;
+			
+			var cow;
+			var mixercow;
+			var cowtick=-1;
+			
+			var ark;
+			
+			var sound1;
+			var sound2;
+
+			var TS_SHOFAR=0;
+			var TS_PRIEST=1;
+			var TS_PRIEST_BLESSING=2;
+			var TS_COW=3;
+			var TS_COW_REMOVE=4;
+			var TS_ARK_ADD=5;
+			var TS_ARK_FLARE_ADD=6;
+			var TS_ARK_FLARE_ADD2=7;
+			var TS_ARK=8;
+			var templestate=TS_SHOFAR;
+
+			var space;
+			
+			var loadedmodel=0;
+			var totalmodel=-1;
+			var loadedshofar=0;
+			var totalshofar=-1;
+			
+			
+			var cubeCamera2;	
+			var umaterial;
+			
+			var sprites = [];
+			
+
+			init();
+			
+			animate();
+
+			function $( id ) {
+
+				return document.getElementById( id );
+
+			}
+			
+			// Play the shofar
+			function animateShofar()
+			{
+				if (!mixershofar)
+					mixershofar = new THREE.AnimationMixer( shofar );
+				mixershofar.clipAction( shofar.geometry.animations[2] ).reset();
+				mixershofar.clipAction( shofar.geometry.animations[2] ).clampWhenFinished=true;
+				mixershofar.addEventListener('finished',function(e){
+					sound1.play();
+					mixershofar.clipAction( shofar.geometry.animations[1] ).reset();
+					mixershofar.clipAction( shofar.geometry.animations[1] ).play();
+				});  
+				if (!mixershofar2)
+					mixershofar2 = new THREE.AnimationMixer( shofar2 );
+				mixershofar2.clipAction( shofar2.geometry.animations[2] ).reset();
+				mixershofar2.clipAction( shofar2.geometry.animations[2] ).clampWhenFinished=true;
+				//this.clampWhenFinished
+				mixershofar2.addEventListener('finished',function(e){
+
+					//play('Idle',true);
+					mixershofar2.clipAction( shofar2.geometry.animations[1] ).reset();
+					mixershofar2.clipAction( shofar2.geometry.animations[1] ).play();
+				});	
+				if (sound1.isPlaying)
+					sound1.stop();
+
+				var audioLoader = new THREE.AudioLoader();
+				audioLoader.load( 'sounds/shofar.mp3', function( buffer ) {
+					sound1.setBuffer( buffer );
+					sound1.setRefDistance( 20 );
+					sound1.setVolume(0.25);
+					// only animate once sound loaded
+					mixershofar.clipAction( shofar.geometry.animations[2] ).setDuration( 1 ).setLoop(THREE.LoopOnce).play();
+					mixershofar2.clipAction( shofar2.geometry.animations[2] ).setDuration( 0.9 ).setLoop(THREE.LoopOnce).play();
+					sound1.source.onended = function() {
+						if (templestate==TS_SHOFAR||templestate==TS_ARK) {
+							mixershofar.clipAction( shofar.geometry.animations[0] ).setDuration(0.95).setLoop(THREE.LoopOnce);//setEffectiveTimeScale(-1);
+							mixershofar.clipAction( shofar.geometry.animations[0] ).reset();
+							mixershofar.clipAction( shofar.geometry.animations[0] ).play();
+							mixershofar2.clipAction( shofar2.geometry.animations[0] ).setDuration(1).setLoop(THREE.LoopOnce);//setEffectiveTimeScale(-1);
+							mixershofar2.clipAction( shofar2.geometry.animations[0] ).play();
+							mixershofar.addEventListener('finished',function(e){
+								mixershofar.clipAction( shofar.geometry.animations[3] ).reset();
+								mixershofar.clipAction( shofar.geometry.animations[3] ).play();
+							});							
+							mixershofar2.addEventListener('finished',function(e){
+								mixershofar2.clipAction( shofar2.geometry.animations[3] ).reset();
+								mixershofar2.clipAction( shofar2.geometry.animations[3] ).play();
+							});		
+						}
+						this.isPlaying = false; /* sets Three wrapper property correctly */
+					};
+					//sound1.play();
+				});				
+			}
+			
+  
+			function config() {
+				if ($( "configdiv" ).style.display=="none")
+					$( "configdiv" ).style.display = "";
+				else
+					$( "configdiv" ).style.display = "none";
+			}
+			
+			function init() {
+			
+
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+				
+  
+				// CAMERA
+				camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 2000000 );
+				camera.eulerOrder = "YXZ";
+
+				// SCENE
+				scene = new THREE.Scene();
+				if (fog)
+					scene.fog = new THREE.Fog( 0xffffff, 1000, 4000 );	
+				scene.add( camera );
+
+				// LIGHTS
+
+				scene.add( new THREE.AmbientLight( 0x222222 ) );
+
+				listener = new THREE.AudioListener();
+				camera.add( listener );
+				
+				sound1 = new THREE.PositionalAudio( listener );
+				sound2 = new THREE.PositionalAudio( listener );
+
+				
+				scene.add( sound1 );			
+				scene.add(sound2);
+		
+				// RENDERER
+				renderer = new THREE.WebGLRenderer( { antialias: true } );
+				//renderer.setClearColor( scene.fog.color );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+				container.appendChild( renderer.domElement );
+ 				//
+
+				renderer.gammaInput = true;
+				renderer.gammaOutput = true;
+
+		
+			   
+				// STATS
+
+				//stats = new Stats();
+				//container.appendChild( stats.dom );
+
+				// EVENTS
+
+				window.addEventListener( 'resize', onWindowResize, false );
+				
+				otouchscreen=new OPENWORLD.Touchscreen();
+	
+
+				sky = new THREE.Sky();
+				scene.add( sky.mesh );
+
+				// Add Sun Helper
+				sunSphere = new THREE.Mesh(
+					new THREE.SphereBufferGeometry( 20000, 16, 8 ),
+					new THREE.MeshBasicMaterial( { color: 0xffffff } )
+				);
+				sunSphere.position.y = - 700000;
+				sunSphere.visible = true;
+				scene.add( sunSphere );
+
+
+				var onError = function ( xhr ) { };
+				
+				// Load the temple
+				var mtlLoader = new THREE.MTLLoader();
+				mtlLoader.setPath( 'models/temple/' );
+				mtlLoader.load( 'temple.mtl', function( materials ) {
+
+					materials.preload();
+
+					var objLoader = new THREE.OBJLoader();
+					objLoader.setMaterials( materials );
+					objLoader.setPath( 'models/temple/' );
+					objLoader.load( 'temple.obj', function ( object ) {	
+						// Once you have loaded the temple you now have the surfaces to place objects on top of
+						space = new OPENWORLD.Space(object);
+						scene.add( object );
+						// Place the camera in world coords at 8.59, 1.31 on the surface
+						space.worldToLocalSurfaceObj(camera,8.59,1.31,0.15);
+						// Initially look at the temple
+						camera.lookAt(space.WorldToLocal(0,1.31,0));
+						
+						joystick = new VirtualJoystick({
+							mouseSupport	: true,
+							stationaryBase	: true,
+							baseX		: 70,
+							baseY		: 70,
+							strokeStyle : 'grey',
+							limitStickTravel:true,
+
+						}, camera, space);
+					
+						$( "config" ).addEventListener( 'touchstart', config);
+						$( "config" ).addEventListener( 'click', config);
+
+						// Light up the temple with spotlight				
+						light = new THREE.SpotLight(0xffffff);
+						light.intensity  = 2;
+						light.penumbra =1;
+						space.worldToLocalObj(light,3,1.3,7);
+						scene.add( light );
+	
+						// Show the altar fire
+						VolumetricFire.texturePath = 'openworldjs/VolumetricFireTextures/';
+
+						var fireWidth  = 2;
+						var fireHeight = 4;
+						var fireDepth  = 2;
+						var sliceSpacing = 0.5;
+
+						fire = new VolumetricFire(
+						  fireWidth,
+						  fireHeight,
+						  fireDepth,
+						  sliceSpacing,
+						  camera
+						);
+						space.worldToLocalSurfaceObj(fire.mesh,3.35,0.51,0.3);//3.7);
+						fire.mesh.scale.x=0.25;
+						fire.mesh.scale.y=0.25;
+						fire.mesh.scale.z=0.25;
+						scene.add( fire.mesh );
+
+						
+						loadedmodel=-2;
+
+						callbackFinished();
+						
+						// Show the two shofars
+						var geometry = new THREE.PlaneBufferGeometry( 16000, 16000 );
+						var material = new THREE.MeshPhongMaterial( { emissive: 0x220000 } );
+						var loader = new THREE.JSONLoader();
+
+						loader.load( "actors/shofar/shofar.json", function ( geometry, materials ) {
+						
+							for ( var k in materials ) {
+								materials[k].skinning = true;
+							}
+							shofar = new THREE.SkinnedMesh(geometry,new THREE.MultiMaterial(materials));
+							shofar.scale.set( 0.004, 0.004, 0.004);
+							// 
+							space.worldToLocalSurfaceObj(shofar,7.7,2,0.14);//3.42);
+							shofar.skeleton.useVertexTexture = false;					
+							shofar2=shofar.clone();
+							space.objTurn(shofar,180);
+							scene.add( shofar );	
+							space.worldToLocalSurfaceObj(shofar2,7.7,0.7,0.14);//3.42);							
+							space.objTurn(shofar2,0);
+							scene.add( shofar2 );	
+							
+                            animateShofar();
+								
+							// Put a spot light on both shofars
+							lightshofar = new THREE.SpotLight(0xffffff);//PointLight(0xffffff)
+							lightshofar.intensity  = 0.6;
+							lightshofar.angle=0.5;
+							lightshofar.penumbra =0.5;
+							lightshofar.position.set( 8.59,5,-1.3);//200, 450, 500 );
+							var dummy=new THREE.Object3D() ;
+							dummy.position.set(7.7,3.42,-1.3);
+							scene.add(dummy);
+							lightshofar.target=dummy;//shofar;
+							scene.add(lightshofar );
+													
+							
+							loadedshofar=-2;
+							callbackFinished();
+			
+							}
+						 , shofarprogress, onError );
+
+						}, callbackProgress, onError );
+
+				});
+
+				// Show the sky
+			    effectController  = {
+					turbidity: 10,
+					reileigh: 2,
+					mieCoefficient: 0.005,
+					mieDirectionalG: 0.8,
+					luminance: 1,
+					inclination: 0.49, // elevation / inclination
+					azimuth: 0.1,//0.25, // Facing front,
+					sun: ! true
+				};			   
+				skyChange();
+
+				// Show the progress of loading the models
+				var callbackProgress = function( progress, result ) {
+
+					var bar = 250;
+					var total = progress.totalModels + progress.totalTextures;
+					var loaded = progress.loadedModels + progress.loadedTextures;
+
+					loadedmodel=loaded;
+					totalmodel=total;
+
+					total=total+totalshofar;
+					loaded=loaded+loadedshofar;
+					if ( total )
+						bar = Math.floor( bar * loaded / total );
+
+
+					$( "bar" ).style.width = bar + "px";
+
+				};
+
+				var callbackFinished = function ( result ) {
+					if (loadedshofar==-2&&loadedmodel==-2) {
+						$( "message" ).style.display = "none";
+						$( "progressbar" ).style.display = "none";
+
+						$( "progress" ).style.display = "none";
+					}
+				};
+
+				$( "progress" ).style.display = "block";
+				
+				var shofarprogress= function ( item, loaded, total ) {
+					var bar = 250;
+					if (typeof loaded != "undefined") {
+						loadedshofar=loaded;
+						totalshofar=total;
+						total=total+totalmodel;
+						loaded=loaded+loadedmodel;
+						if ( total )
+							bar = Math.floor( bar * loaded / total );
+						$( "bar" ).style.width = bar + "px";
+					}
+				};
+				
+
+			}
+
+			// EVENT HANDLERS
+
+			function onWindowResize( event ) {
+
+				SCREEN_WIDTH = window.innerWidth;
+				SCREEN_HEIGHT = window.innerHeight;
+
+				renderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+
+				camera.aspect = SCREEN_WIDTH/ SCREEN_HEIGHT;
+				camera.updateProjectionMatrix();
+
+			}
+
+				
+			// Change the sky based upon the inclination of the sun
+			function skyChange() {
+				var distance = 400000;
+
+				var uniforms = sky.uniforms;
+				uniforms.turbidity.value = effectController.turbidity;
+				uniforms.reileigh.value = effectController.reileigh;
+				uniforms.luminance.value = effectController.luminance;
+				uniforms.mieCoefficient.value = effectController.mieCoefficient;
+				uniforms.mieDirectionalG.value = effectController.mieDirectionalG;
+
+				var theta = Math.PI * (effectController.inclination - 0.5 );
+				var phi = 2 * Math.PI * ( effectController.azimuth - 0.5 );
+
+				sunSphere.position.x = distance * Math.cos( phi );
+				sunSphere.position.y = distance * Math.sin( phi ) * Math.sin( theta );
+				sunSphere.position.z=  distance * Math.sin( phi ) * Math.cos( theta )
+
+				sunSphere.visible = effectController.sun;
+
+				sky.uniforms.sunPosition.value.copy( sunSphere.position );
+
+				//renderer.render( scene, camera );
+
+			}
+			
+			function cowSound()
+			{
+				var tick = system.currentMilliseconds();// d.getTime(); 
+				if (cowtick==-1||cowtick-tick<0) {
+					if (sound1.isPlaying)
+						sound1.stop();
+					cowtick=tick+4000+(Math.floor(Math.random()*20000)+1);
+					var audioLoader = new THREE.AudioLoader();
+					audioLoader.load( 'sounds/moo'+(Math.floor(Math.random()*3)+1)+'.mp3', function( buffer ) {
+						sound1.setBuffer( buffer );
+						sound1.setRefDistance( 20 );
+						sound1.setVolume(0.1);						
+						sound1.play();
+
+					});
+				}
+			}
+			
+			
+			function wingflap()
+			{
+				if (sound2.isPlaying) 
+					sound2.stop();
+				var audioLoader = new THREE.AudioLoader();
+				audioLoader.load( 'sounds/flap'+(Math.floor(Math.random()*3)+1)+'.mp3', function( buffer ) {
+					sound2.setBuffer( buffer );
+					sound2.setRefDistance( 20 );
+					sound2.setVolume(0.1);						
+					sound2.play();
+				});
+			}
+			
+			function flyup()
+			{
+				if (cameraoffset<3) {
+					cameraoffset+=0.1;
+					space.objUpSurface(camera,cameraoffset);//camera.position.x+=0.01; //trick to show						
+				}
+				wingflap();
+			}
+
+			function flydown()
+			{
+				if (cameraoffset>0.15) {
+					cameraoffset-=0.1;
+					space.objUpSurface(camera,cameraoffset);//camera.position.x+=0.01; //trick to show
+					wingflap();
+				}
+			}
+			
+			var prevlocalx;
+			var prevlocaly;
+			var prevlocalz;
+			
+			function animate() {
+			
+				requestAnimationFrame( animate );
+				
+				if (space) {
+					prevlocalx=camera.position.x;
+					prevlocaly=camera.position.y;
+					prevlocalz=camera.position.z;
+					frameTime = clock.getDelta();
+					
+					var Worldpos=space.localToWorldObj(camera);
+					if (templestate==TS_SHOFAR) {
+						if (mixershofar) {
+							mixershofar.update(frameTime );
+						}
+						if (mixershofar2)
+							mixershofar2.update(frameTime );
+						if (Worldpos.x<4.6) {
+							// Load the priest and remove the shofars when you get close
+							templestate=TS_PRIEST;
+							scene.remove(shofar);
+							scene.remove(shofar2);
+							scene.remove(lightshofar);
+							
+							var geometry = new THREE.PlaneBufferGeometry( 16000, 16000 );
+							var material = new THREE.MeshPhongMaterial( { emissive: 0x220000 } );
+							var loader = new THREE.JSONLoader();
+							loader.load( "actors/priest/priest.json", function ( geometry, materials ) {
+								for ( var k in materials ) {
+
+									materials[k].skinning = true;
+
+								}
+								priest = new THREE.SkinnedMesh(geometry,new THREE.MultiMaterial(materials));
+								priest.scale.set( 0.004, 0.004, 0.004);
+
+								space.worldToLocalSurfaceObj(priest,-0.12,1.3,/*3.42+*/0.15);
+
+								priest.skeleton.useVertexTexture = false;
+								space.objTurn(priest,90);
+								scene.add( priest );
+								mixerpriest = new THREE.AnimationMixer( priest );
+								mixerpriest.clipAction( priest.geometry.animations[3] ).clampWhenFinished=true;
+								mixerpriest.clipAction( priest.geometry.animations[3] ).play();
+									
+							}
+							
+							);	
+						}
+						
+						
+					} else if (templestate==TS_PRIEST && mixerpriest) {
+						mixerpriest.update(frameTime);
+						if (Worldpos.x<1) {
+							// When get close to the priest play his blessing
+							templestate=TS_PRIEST_BLESSING;
+							var audioLoader = new THREE.AudioLoader();
+
+							audioLoader.load( 'sounds/blessing.mp3', function( buffer ) {
+								sound2.setBuffer( buffer );
+								sound2.setRefDistance( 20 );
+								sound2.setVolume(0.2);						
+								//sound1.play();
+								osound.playFade(sound1,sound2,1);
+								sound2.source.onended = function() {
+									if (templestate==TS_PRIEST_BLESSING) {
+										mixerpriest.clipAction( priest.geometry.animations[0] ).setDuration(0.95).setLoop(THREE.LoopOnce);//setEffectiveTimeScale(-1);
+										mixerpriest.clipAction( priest.geometry.animations[0] ).reset();
+										mixerpriest.clipAction( priest.geometry.animations[0] ).clampWhenFinished=true;
+										mixerpriest.clipAction( priest.geometry.animations[0] ).play();
+										mixerpriest.addEventListener('finished',function(e){
+											if (templestate==TS_PRIEST_BLESSING) {
+												mixerpriest.clipAction( priest.geometry.animations[3] ).play();
+											}
+										});								
+									}
+									this.isPlaying = false; /* sets Three wrapper property correctly */
+									//alert('endedi');
+								};
+								
+							});
+							mixerpriest.clipAction( priest.geometry.animations[2] ).clampWhenFinished=true;
+							mixerpriest.clipAction( priest.geometry.animations[2] ).setLoop(THREE.LoopOnce).play();						
+							mixerpriest.clipAction( priest.geometry.animations[3] ).stop();
+							mixerpriest.addEventListener('finished',function(e){							
+								if (templestate==TS_PRIEST_BLESSING) {
+									mixerpriest.clipAction( priest.geometry.animations[1] ).play();
+								}
+
+							}); 						
+						}
+						
+					} else if (templestate==TS_PRIEST_BLESSING) {
+						mixerpriest.update(frameTime);
+						if (Worldpos.x>1.8) {
+							// When leave the priest show the cow
+							templestate=TS_COW;
+							scene.remove(priest);
+							var loader = new THREE.JSONLoader();
+							loader.load( "actors/cow/cow.json", function ( geometry, materials ) {
+								for ( var k in materials ) {
+
+									materials[k].skinning = true;
+
+								}
+								cow = new THREE.SkinnedMesh(geometry,new THREE.MultiMaterial(materials));
+								cow.createdtick= system.currentMilliseconds();
+								cow.scale.set( 0.005, 0.005, 0.005);
+
+								space.worldToLocalSurfaceObj(cow,3,2.4,0);//0.14);//3.45);//-0.12,1.5,3.42);
+
+								cow.skeleton.useVertexTexture = false;
+								
+								scene.add( cow );
+								mixercow = new THREE.AnimationMixer( cow );
+								mixercow.clipAction( cow.geometry.animations[0] ).setDuration(10).play();
+								  
+				
+												}
+									
+							);	
+						}
+						
+					} else if (templestate==TS_COW) {
+						if (mixercow) {
+							if ( system.currentMilliseconds()-cow.createdtick>20000) {
+								templestate=TS_COW_REMOVE;
+							} else {
+								mixercow.update(frameTime );
+								cowSound();
+
+							}
+						}
+
+					} else if (templestate==TS_COW_REMOVE) {
+						// Wait till looking away to remove cow
+						var angletocow=space.getAngleBetweensObjs(camera,cow);
+						var anglecamera=space.getObjTurn(camera);
+						var anglediff=Math.abs(omath.angleDifference(angletocow, anglecamera));
+						//console.log('sound1 ended'+anglediff);
+						if (anglediff>90) {
+							templestate=TS_ARK_ADD;
+							scene.remove(cow);
+						} else
+							cowSound();
+						
+					} else if (templestate==TS_ARK_ADD) {
+						// Wait till looking away to remove
+						var pos1=space.localToWorldObj(camera);
+						var pos2=new THREE.Vector3(3.2,1.5,0);
+						var angletoark=omath.getAngleBetweenPoints(pos1,pos2);
+						var anglecamera=space.getObjTurn(camera);
+						var anglediff=Math.abs(omath.angleDifference(angletoark, anglecamera));
+						if (anglediff>90) {
+							// Add the ark then the flares
+							templestate=TS_ARK_FLARE_ADD;
+
+							cubeCamera2 = new THREE.CubeCamera( 1, 1000, 256 );
+							cubeCamera2.renderTarget.texture.minFilter = THREE.LinearMipMapLinearFilter;
+							space.worldToLocalSurfaceObj(cubeCamera2,7.7,1.2,0.0);
+							scene.add( cubeCamera2 );	
+							umaterial = new THREE.MeshBasicMaterial( {
+								envMap: cubeCamera2.renderTarget.texture
+							} );
+							var objLoader = new THREE.OBJLoader();
+							//objLoader.setMaterial( umaterial);
+							objLoader.setPath( 'models/ark/' );
+							objLoader.load( 'ark.obj', function (object) {
+								ark=object;
+								space.worldToLocalSurfaceObj(ark,3.2,1.5,0.0);
+								//iobject.scale.set( 0.015, 0.015, 0.015);
+								ark.scale.set( 0.15, 0.15, 0.15);
+								
+								ark.children[ 0].material=umaterial;
+								scene.add( ark );
+								ark.createdtick=system.currentMilliseconds();
+								templestate=TS_ARK_FLARE_ADD2;
+								
+							}
+							);	
+						}
+					} else if (templestate==TS_ARK_FLARE_ADD2) {
+
+						if (system.currentMilliseconds()-ark.createdtick>4000) {
+							templestate=TS_ARK;
+							scene.remove(fire.mesh);
+							
+							// Show the flares
+							var textureLoader = new THREE.TextureLoader();
+							flareA = textureLoader.load( "models/ark/lensflare2.jpg" );
+							flareB = textureLoader.load( "models/ark/lensflare0.png" );
+							var fct=0.03;
+							var sa = 2*fct, sb = 5*fct;
+							
+							fct=0.02;
+							var params  = {
+
+								"a" : { map: flareA, color: 0xffffff, blending: THREE.AdditiveBlending },
+								"b" : { map: flareB, color: 0xffffff, blending: THREE.AdditiveBlending },
+
+								"ar" : { map: flareA, color: 0xff0000, blending: THREE.AdditiveBlending },
+								"br" : { map: flareB, color: 0xff0000, blending: THREE.AdditiveBlending }
+
+							};
+
+							var flares = [
+								// front
+								[ "a", sa, [ 47, 38, 120 ] ], [ "a", sa, [ 40, 38, 120 ] ], [ "a", sa, [ 32, 38, 122 ] ],
+								[ "b", sb, [ 47, 38, 120 ] ], [ "b", sb, [ 40, 38, 120 ] ], [ "b", sb, [ 32, 38, 122 ] ],
+								[ "a", sa, [ -47, 38, 120 ] ], [ "a", sa, [ -40, 38, 120 ] ], [ "a", sa, [ -32, 38, 122 ] ],
+								[ "b", sb, [ -47, 38, 120 ] ], [ "b", sb, [ -40, 38, 120 ] ], [ "b", sb, [ -32, 38, 122 ] ],
+								// back
+								[ "ar", sa, [ 22, 50, -123 ] ], [ "ar", sa, [ 32, 49, -123 ] ],
+								[ "br", sb, [ 22, 50, -123 ] ], [ "br", sb, [ 32, 49, -123 ] ],
+								[ "ar", sa, [ -22, 50, -123 ] ], [ "ar", sa, [ -32, 49, -123 ] ],
+								[ "br", sb, [ -22, 50, -123 ] ], [ "br", sb, [ -32, 49, -123 ] ],
+							];
+
+							for ( var i = 0; i < flares.length; i ++ ) {
+
+								var p = params[ flares[ i ][ 0 ] ];
+
+								var s = flares[ i ][ 1 ];
+
+								var x = flares[ i ][ 2 ][ 0 ]*fct;
+								var y = flares[ i ][ 2 ][ 1 ]*fct;
+								var z = flares[ i ][ 2 ][ 2 ]*fct;
+
+								var material = new THREE.SpriteMaterial( p );
+								var sprite = new THREE.Sprite( material );
+
+								var spriteWidth = 128;
+								var spriteHeight = 128;
+
+								sprite.scale.set( s * spriteWidth, s * spriteHeight, s );
+								sprite.position.set( x, y, z );
+
+								ark.children[0].add( sprite );
+
+								sprites.push( sprite );
+								//iobject.renderOrder=0;
+
+							}
+
+							scene.add(shofar);
+							space.worldToLocalSurfaceObj(shofar,3.2,2.1,0.14);
+							scene.add(shofar2);
+							space.worldToLocalSurfaceObj(shofar2,3.2,0.8,0.14);
+							animateShofar();
+							
+							// Once the ark appears let people fly
+							$( "fly" ).style.display = "";
+
+					        $( "flyup" ).addEventListener( 'click', flyup);//function() {
+					        $( "flyup" ).addEventListener( 'touchstart', flyup);//function() {
+							$( "flydown" ).addEventListener( 'click', flydown);//
+							$( "flydown" ).addEventListener( 'touchstart', flydown);//
+				
+							
+						}
+					
+					
+					} else if (templestate==TS_ARK) {
+						mixershofar.update(frameTime );
+						mixershofar2.update(frameTime );
+
+					} 
+
+					joystick.update();
+					osound.update();
+						
+					effectController.inclination+=frameTime*0.01;
+					skyChange();
+					if (fire)
+						fire.update( clock.getElapsedTime());
+						
+					// Flicker the spot light on the temple slightly
+					if (light) {
+						light.intensity += frameTime*(5*Math.random()-2.5);//= 2+Math.random()*0.1-0.05;
+						if (light.intensity>2.3)
+							light.intensity=2.3;
+						else if (light.intensity<1.7)
+							light.intensity=1.7;
+					}
+				}
+				render();
+
+	
+			}
+				
+			var inc=0;
+			
+			function render() {
+
+				var delta = clock.getDelta();
+
+				// Test hit a wall and if so go back
+				if (space&&(prevlocalx!=camera.position.x||prevlocalz!=camera.position.z)) {
+					// calculate objects intersecting the picking ray
+					if (typeof space._surface != "undefined"&&typeof space._surface.children != "undefined"&&typeof space._walls != "undefined"&&typeof space._walls.children != "undefined") {
+						var distintersect=space.wallIntersectDistance(camera.position.x,camera.position.y,camera.position.z, prevlocalx, prevlocaly, prevlocalz)
+						var dostop=	distintersect>=0&& distintersect<0.3;
+						if (!dostop) {
+							// dont walk into the ark
+							if (ark) {
+								dostop=space.getDistanceBetweenObjs(camera,ark)<0.2;
+							}
+						}
+						if (dostop){
+							camera.position.x=prevlocalx;
+							camera.position.z=prevlocalz;
+						}
+							
+							//}
+						//}
+
+					} else {
+						prevlocalx=-1;
+					}
+				}
+				// Update the ark texture every 25 frames
+				if (cubeCamera2&&ark&&inc%25==0){
+					umaterial.envMap = cubeCamera2.renderTarget.texture;
+					umaterial.color.setHex(0xffff66);
+					cubeCamera2.updateCubeMap( renderer, scene );
+				}
+ 				renderer.render( scene, camera );
+				inc++;
+			}
+
+		</script>
+
+	</body>
+</html>
