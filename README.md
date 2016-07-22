@@ -1,6 +1,6 @@
 # Open World for threejs
 A minimalistic framework to make it easier creating an open world with threejs for both smartphones and desktops.
-oo
+
 To demonstrate the framework, a demo had be made for the Second Temple, the temple that was at the center of judaism before 77AD. It is where the dome of the rock currently stands on the temple mount in Jerusalem. In the demo you can explore the second temple. This framework also includes the original blender models for the temple and also the actors in the demo.
 
 Live Demo http://www.secondtemple.org
@@ -13,14 +13,11 @@ Unzip the distrubution and then double click index.html under /web/secondtemple
 
 **Intro**
 
-The framework revolves around a main world model that contains surfaces and walls that the framework detects to allow a user to walk around a model. The demo include a blender model for the second temple. It contains meshes with the word wall and surface in them to specify that a mesh is a surface or wall. The minimalistic framework is in the javascript file /web/secondtemple/openworldjs/openworld.js has function to detect collisions, giving world coords eg 5,4,0 means 5,4 in the xy plane and height zero off the surface
+The framework revolves around a main world model that contains surfaces and walls that the framework detects to allow a user to walk around a model. The demo include a blender model for the second temple. It contains meshes with the word wall and surface in them to specify that a mesh is a surface or wall. In general a blender model unit of distance should be about a meter with up being the Z axis. The minimalistic framework is in the javascript file /web/secondtemple/openworldjs/openworld.js and has functions that make it possible to work with world coordinates and directions instead of local coordinates and rotations. For example the coordinates 5,4,0 means 5,4 in the xy plane and height zero off the surface of the model. Also direction can be specified with 90 degrees being east, 180 being south.
 
-also turning 90 degrees simple
+The openworld framework also includes an purpose controller with virtual joystick that works on a smartphone, also keyboard and mouse movement.
 
-also has an all purpse controller with virtual joystick that works on a smartphone, also keyboard and mouse movement
-
-everything else use threejs as standard
-
+Outside world coordinates and the controller, everything else such as loading models, sound, sky etc uses the standard threejs libraries.
 
 **Using blender models**
 
