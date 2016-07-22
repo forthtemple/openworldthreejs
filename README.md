@@ -31,29 +31,14 @@ A surface mesh will be intersected by the open world framework to determine the 
 
 ![alt tag](http://secondtemple.org/screenshots/exportobj.jpg) 
 
-To export a mesh such as /models/secondtemple/priest/priest.blend to json make sure the Blender export io_three is placed under the directory Blender\2.xx\scripts\addons. Exporting to json can be fiddly where you must first select the mesh you wish to export such as:
+To export a mesh such as /models/secondtemple/priest/priest.blend to json make sure the Blender export io_three is placed under the directory Blender\2.xx\scripts\addons. Exporting to json can be fiddly where you must first select the mesh you wish to export such as selecting body:
 
 ![alt tag](http://secondtemple.org/screenshots/jsonselectmesh.jpg) 
 
-And then you have to specify all the correct flags once you export. These are the ones that work:
+And then when you export to json you must specify all the correct flags once to export so that it is not missing animation, bone, texture information. These are the ones that work:
 
 ![alt tag](http://secondtemple.org/screenshots/exportjsonsmall.jpg) 
 
-mention hidden
-mention 1meter Z, xy
-
-, or non actors convert to obj so that can have multi texture
-	-for main world
-		-tend to use a lot of repeating textures
-		-export selected for hidden
-		-tempole.blend has hidden
-		-have the name surface in the mesh name for surfaces
-		-walls
-		-blender have
-	-also for mdoels in world that are non actors eg the ark
-for actors export as json but only one texture
-	-how add json exporter for blender
-	-steps how to export
 
 	
 
