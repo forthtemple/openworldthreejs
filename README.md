@@ -13,7 +13,7 @@ Unzip the distrubution and then double click index.html under /web/secondtemple
 
 **Intro**
 
-The framework revolves around a main world model that contains surfaces and walls that the framework detects to allow a user to walk around a model. The demo include a blender model for the second temple. It contains meshes with the word wall and surface in them to specify that a mesh is a surface or wall. In general a blender model unit of distance should be about a meter with up being the Z axis. The minimalistic framework is in the javascript file /web/secondtemple/openworldjs/openworld.js and has functions that make it possible to work with world coordinates and directions instead of local coordinates and rotations. For example the coordinates 5,4,0 means 5,4 in the xy plane and height zero off the surface of the model. Also direction can be specified with 90 degrees being east, 180 being south.
+The framework revolves around a main world model that contains surfaces and walls that the framework detects to allow a user to walk around a model. The demo includes a blender model for the second temple (/models/secondtemple/temple/temple.blend). The minimalistic framework is in the javascript file /web/secondtemple/openworldjs/openworld.js and has functions that make it possible to work with world coordinates and directions instead of local coordinates and rotations. For example the coordinates 5,4,0 means 5,4 in the xy plane and height zero off the surface of the model. Also direction can be specified with 90 degrees being east, 180 being south.
 
 The openworld framework also includes an purpose controller with virtual joystick that works on a smartphone, also keyboard and mouse movement.
 
@@ -23,7 +23,15 @@ Outside world coordinates and the controller, everything else such as loading mo
 
 All the models in the demos are created using Blender. There are included in the repository. In the demo models are exported as wavefront 'obj' models since they allow for multiple texturing. For actors they are exported from Blender as json models since they include animations which json allows for but obj does not.
 
-If you open /models/secondtemple/temple/temple.blend
+If you open /models/secondtemple/temple/temple.blend notice the multiple meshes. Notice that some have the word wall and some surface in them.
+
+![alt tag](http://secondtemple.org/screenshots/wallsurface.jpg) 
+
+A surface mesh will be intersected by the open world framework to determine the ground. Walls are also detected to stop players walking through walls. Also notice the units of distance in the blender model are around about 1 meter. Also Z is up. Also some meshes are hidden in order to reduce the size. To export the temple.blend model to obj, select all the meshes you wish to export (will exclude the hidden ones) and then export the obj and then click on 'selection only' to only export the selected meshes.
+
+
+mention hidden
+mention 1meter Z, xy
 
 , or non actors convert to obj so that can have multi texture
 	-for main world
