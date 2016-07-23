@@ -39,6 +39,8 @@ And then when you export to json you must specify all the correct flags once to 
 
 ![alt tag](http://secondtemple.org/screenshots/exportjsonsmall.jpg) 
 
+**To Do**
 
+Currently a simple PHP based server is being created to allow for a multi user open world. 
 	
 
