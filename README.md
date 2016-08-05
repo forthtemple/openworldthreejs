@@ -44,6 +44,22 @@ And then when you export to json you must specify all the correct flags once to 
 ![alt tag](http://secondtemple.org/screenshots/exportjsonsmall.jpg) 
 
 **Server**
+The server is written in PHP and MySQL. MySQL is used to hold the player positions and also includes messaging. Every second a player polls the server giving the server via json the players position. In return the server gives player positions in the players vicinity and also any messages from players.
+
+*Installation*
+1. From the distribution copy the server directory to your host that has PHP and MySQL. It should be the same directory as your index.html file. Eg
+     - index.html
+     - actors
+     - server
+     - models
+     - openworldjs
+2. Create a MySQL database such as 'openworld' with a user and password
+3. Run the openworld.sql script under /server on the new database
+4. Change the base_server.php mysql username and password and database to the database you just setup
+
+Now when you click on 'Connect' when browser index.html it should connect you to the server.
+
+
 
 
 
