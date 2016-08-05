@@ -8,14 +8,12 @@ Click 'connect' to connect to the server
 
 ![alt tag](http://secondtemple.org/screenshots/temple200.jpg)  ![alt tag](http://secondtemple.org/screenshots/templeiii200.jpg)
 
-**Installation**
-
+**Installation**  
 Unzip the distrubution and then double click index.html under /web/secondtemple
 
 For instructions on setting up the server refer to the server section at the end.
 
-**Intro**
-
+**Intro**  
 The framework revolves around a main world model that contains surfaces and walls that the framework detects to allow a user to walk around a model. The demo includes a blender model for the second temple (/models/secondtemple/temple/temple.blend). The minimalistic framework is in the javascript file /web/secondtemple/openworldjs/openworld.js and has functions that make it possible to work with world coordinates and directions instead of local coordinates and rotations. For example the coordinates 5,4,0 means 5,4 in the xy plane and height zero off the surface of the model. Also direction can be specified with 90 degrees being east, 180 being south.
 
 The openworld framework also includes an all purpose controller with virtual joystick that works on a smartphone. It also works with a keyboard and mouse.
@@ -23,8 +21,7 @@ The openworld framework also includes an all purpose controller with virtual joy
 There is also a server written in PHP and MySQL that allows multiple users to interact on the server. It has a base server that can be the basis for other multi user open worlds.
 
 
-**Using blender models**
-
+**Using blender models**  
 All the models in the demos are created using Blender. There are included in the repository. In the demo, models are exported as wavefront 'obj' models since they allow for multiple texturing. For actors they are exported from Blender as json models since they include animations which json allows for but obj does not.
 
 If you open /models/secondtemple/temple/temple.blend notice the multiple meshes. Notice that some have the word wall and some surface in them.
@@ -43,20 +40,20 @@ And then when you export to json you must specify all the correct flags once to 
 
 ![alt tag](http://secondtemple.org/screenshots/exportjsonsmall.jpg) 
 
-**Server**
-The server is written in PHP and MySQL. MySQL is used to hold the player positions and also includes messaging. Every second a player polls the server giving the server via json the players position. In return the server gives player positions in the players vicinity and also any messages from players.
+**Server**  
+The server is written in PHP and MySQL. MySQL is used to hold the player positions and also includes messaging. Every second a player polls the server giving the server via json the players position. In return the server gives player positions in the players vicinity and also any messages from players. 
 
 *Installation*
-1. From the distribution copy the server directory to your host that has PHP and MySQL. It should be the same directory as your index.html file. Eg
-     - index.html
-     - actors
-     - server
-     - models
-     - openworldjs
-2. Create a MySQL database such as 'openworld' with a user and password
-3. Run the openworld.sql script under /server on the new database
-4. Change the base_server.php mysql username and password and database to the database you just setup
-
+1. From the distribution copy the server directory to your host that has PHP and MySQL. It should be the same directory as your index.html file. Eg  
+     - index.html  
+     - actors  
+     - server  
+     - models  
+     - openworldjs  
+2. Create a MySQL database such as 'openworld' with a user and password  
+3. Run the openworld.sql script under /server on the new database  
+4. Change the base_server.php mysql username and password and database to the database you just setup  
+  
 Now when you click on 'Connect' when browser index.html it should connect you to the server.
 
 
