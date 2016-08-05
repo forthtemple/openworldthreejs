@@ -17,6 +17,8 @@ OPENWORLD.Space	= function(mesh)
 	this._mesh=mesh;
 	this._math=new OPENWORLD.Math();
 	
+	this._lerpobjects=[];
+
 	// Get all meshes with the word surface in them for surface intersection
 	this._surface= mesh.clone();
 	var obj, i;
@@ -55,7 +57,7 @@ OPENWORLD.Space	= function(mesh)
 	this.localIntersectSurface = function(localx,localy,localz)
 	{
 		if (typeof this._surface != "undefined"&&typeof this._surface.children != "undefined"&&typeof this._walls != "undefined"&&typeof this._walls.children != "undefined") {
-			this._raycaster.set( new THREE.Vector3(localx,999,localz), new THREE.Vector3( 0, -1, 0 ));
+			this._raycaster.set( new THREE.Vector3(localx,camera.position.y,localz), new THREE.Vector3( 0, -1, 0 ));
 			// calculate objects intersecting the picking ray
 			var intersects = this._raycaster.intersectObjects( this._surface.children);
 			if (intersects.length>0) {
@@ -72,7 +74,7 @@ OPENWORLD.Space	= function(mesh)
 	{
 		var localx=x;		
 		var localz=-y;
-		return this.localIntersectSurface(localx, 999, localz);
+		return this.localIntersectSurface(localx, camera.position.y, localz);
 	}
 	
 	// local coords of world coords intersection with surface looking down
@@ -85,11 +87,27 @@ OPENWORLD.Space	= function(mesh)
 	
 	// set object to have world coords x,y,z where z is relative to the surface intersection
 	this.worldToLocalSurfaceObj = function(object, x,y,z) { 
+		// if being lerped somewhere else then remove it from the lerp
+		var ind=this._lerpobjects.indexOf(object);
+		if (ind>=0)
+			this._lerpobjects.splice(ind,1);
 		var position= this.worldToLocalSurface(x,y,z); 
 		object.position.set(position.x, position.y, position.z);
 	}
 	
-	//  set to have world coords x,y,z but not relative to the surface
+	// move object to x,y,z taking time seconds - lerp to the position
+	this.worldToLocalSurfaceObjLerp = function(object, x,y,z, time) { 
+		var position= this.worldToLocalSurface(x,y,z); 
+		//object.position.set(position.x, position.y, position.z);
+		object._lerpfromtime=system.currentMilliseconds();
+		object._lerptotime=time;
+		object._lerpinitialpos=object.position.clone();
+		object._lerpfinalpos=position;
+		if (this._lerpobjects.indexOf(object)<0)
+			this._lerpobjects.push(object);
+	}
+
+		//  set to have world coords x,y,z but not relative to the surface
 	this.worldToLocalObj = function(object, x,y,z) { 
 		var position= this.worldToLocal(x,y,z); 
 		object.position.set(position.x, position.y, position.z);
@@ -135,7 +153,7 @@ OPENWORLD.Space	= function(mesh)
 	this.objForwardSurface = function(object, moveamt, z)
 	{
 		object.translateZ(moveamt);
-		var localy= this.localIntersectSurface(object.position.x,999,object.position.z);
+		var localy= this.localIntersectSurface(object.position.x,camera.position.y,object.position.z);
 		object.position.y=localy+z;
 	}
 	
@@ -176,6 +194,8 @@ OPENWORLD.Space	= function(mesh)
 		return -1;
 								
 	}
+
+
 }
 
 //////
@@ -287,8 +307,15 @@ OPENWORLD.Math = function()
         return ret;
     }
     
+    this.vectorDistance= function (v,v2)
+    {
+    	var deltaX=v.x-v2.x;
+		var deltaY=v.y-v2.y;
+		return  Math.sqrt( (deltaX * deltaX) + (deltaY * deltaY) );
+    }
 }
 
+//var preventdefault=false;
 /////////
 // This controller combines a virtual joystick for smartphones, keyboard and mouse controls into one. 
 // This code is based upon Jerome Etienne virtual joystick and keyboard code
@@ -562,7 +589,10 @@ VirtualJoystick.prototype._onMouseUp	= function(event)
 
 VirtualJoystick.prototype._onMouseDown	= function(event)
 {
-	event.preventDefault();
+	if (this_active) {//preventdefault)
+		event.preventDefault();
+		//alert('here');
+	}
 	var x	= event.clientX;
 	var y	= event.clientY;
 	return this._onDown(x, y);
@@ -582,6 +612,8 @@ VirtualJoystick.prototype._onMouseMove	= function(event)
 
 VirtualJoystick.prototype._onTouchStart	= function(event)
 {
+	if (!this_active)
+		return;
 	
 		// if there is already a touch inprogress do nothing
 		if( this._touchIdx !== null )	return;
@@ -593,7 +625,11 @@ VirtualJoystick.prototype._onTouchStart	= function(event)
 		// dispatch touchStart
 		this.dispatchEvent('touchStart', event);
 
-		event.preventDefault();
+	   // if (this._active) {//preventdefault)
+		   event.preventDefault();
+		   //alert('ere');
+		//} //else
+		//alert('nnn');
 		
 
 
@@ -647,7 +683,8 @@ VirtualJoystick.prototype._onTouchMove	= function(event)
 	if( i === touchList.length)	return;
 	var touch	= touchList[i];
 
-	event.preventDefault();
+	if (this_active)//preventdefault)
+    	event.preventDefault();
 
 	var x		= touch.pageX;
 	var y		= touch.pageY;
@@ -792,6 +829,7 @@ VirtualJoystick.KeyboardState	= function(domElement)
 	this.domElement.addEventListener("keydown", this._onKeyDown, false);
 	this.domElement.addEventListener("keyup", this._onKeyUp, false);
 	
+	this_active=true;
 			
 }
 
@@ -922,28 +960,30 @@ VirtualJoystick.prototype.update = function()
 		
 	var joystickturn=false;
 	
-	if( this.keyboard.pressed("D")|| this.keyboard.pressed("right") ){
-			if (joystickturn)
-				this._camera.rotateY(frameTime * rotamt* Math.PI / 180);
-			else
-				this._space.objLeftRightSurface(this._camera, moveamt*frameTime, cameraoffset);
-				//camera.translateX(moveamt * frameTime );
-	}
-	if( this.keyboard.pressed("A")|| this.keyboard.pressed("left") ){
-			if (joystickturn)
-				this._camera.rotateY(-frameTime * rotamt* Math.PI / 180);
-			else
-				this._space.objLeftRightSurface(this._camera, -moveamt*frameTime, cameraoffset);					
-				//camera.translateX( - moveamt * frameTime );
-	}
-	if( this.keyboard.pressed("W") || this.keyboard.pressed("up")){
-		this._space.objForwardSurface(this._camera, -moveamt*frameTime, cameraoffset);					
-		//camera.translateZ( - moveamt * frameTime );
-	}
-	if( this.keyboard.pressed("S")|| this.keyboard.pressed("down") ){
-		this._space.objForwardSurface(this._camera, moveamt*frameTime, cameraoffset);					
-		//camera.translateZ( moveamt * frameTime );
-	}
+	if (this_active) {
+		if( this.keyboard.pressed("D")|| this.keyboard.pressed("right") ){
+				if (joystickturn)
+					this._camera.rotateY(frameTime * rotamt* Math.PI / 180);
+				else
+					this._space.objLeftRightSurface(this._camera, moveamt*frameTime, cameraoffset);
+					//camera.translateX(moveamt * frameTime );
+		}
+		if( this.keyboard.pressed("A")|| this.keyboard.pressed("left") ){
+				if (joystickturn)
+					this._camera.rotateY(-frameTime * rotamt* Math.PI / 180);
+				else
+					this._space.objLeftRightSurface(this._camera, -moveamt*frameTime, cameraoffset);					
+					//camera.translateX( - moveamt * frameTime );
+		}
+		if( this.keyboard.pressed("W") || this.keyboard.pressed("up")){
+			this._space.objForwardSurface(this._camera, -moveamt*frameTime, cameraoffset);					
+			//camera.translateZ( - moveamt * frameTime );
+		}
+		if( this.keyboard.pressed("S")|| this.keyboard.pressed("down") ){
+			this._space.objForwardSurface(this._camera, moveamt*frameTime, cameraoffset);					
+			//camera.translateZ( moveamt * frameTime );
+		}
+    }
 	if (this._active) {
 		if( this.right() ){
 			if (joystickturn)
@@ -967,13 +1007,43 @@ VirtualJoystick.prototype.update = function()
 
 		}
 	}
+
+	for (i=space._lerpobjects.length-1; i>=0; i-- ) {
+		var obj=space._lerpobjects[i];
+		if (!obj) {
+			space._lerpobjects.splice(i,1);
+		} else {
+			var lerp=(system.currentMilliseconds()-obj._lerpfromtime)/(obj._lerptotime*1000);
+			//alert('iii'+i+' '+lerp);
+			if (lerp>=1) {
+				obj.position.set(obj._lerpfinalpos.x,obj._lerpfinalpos.y,obj._lerpfinalpos.z);
+				//space._lerpobjects.remove(obj);
+				//alert(space._lerpobjects.length+",mmm"+space._lerpobjects.indexOf(obj));
+				var inddelete=space._lerpobjects.indexOf(obj);
+				space._lerpobjects = space._lerpobjects.slice(inddelete, inddelete); 
+				//alert(space._lerpobjects.length+",uummm");
+			} else {
+				obj.position.set(
+					obj._lerpinitialpos.x+lerp*(obj._lerpfinalpos.x-obj._lerpinitialpos.x),
+					obj._lerpinitialpos.y+lerp*(obj._lerpfinalpos.y-obj._lerpinitialpos.y),
+					obj._lerpinitialpos.z+lerp*(obj._lerpfinalpos.z-obj._lerpinitialpos.z));
+
+				/*$(".the-return").html(
+							obj.position.x.toFixed(2)+' y'+obj.position.y.toFixed(2)+"z "+obj.position.z.toFixed(2)
+						);*/
+			}
+		}
+
+	}
+	
 }
 
 //////
 // cheat seems to work. Allows to mix listeners for joystick and touch on screen
 function onDocumentMouseDown( event ) {
 
-	event.preventDefault();
+	if (this_active)//preventdefault)
+	    event.preventDefault();
 
 	document.addEventListener( 'mousemove', onDocumentMouseMove, false );
 	document.addEventListener( 'mouseup', onDocumentMouseUp, false );
@@ -991,7 +1061,7 @@ function onDocumentMouseMove( event ) {
 
 
 	//targetRotation = targetRotationOnMouseDown + ( mouseX - mouseXOnMouseDown ) * 0.02;
-	targetRotationX=event.clientX-mouseX;
+	targetRotationX=mouseX-event.clientX;
 	targetRotationY=event.clientY-mouseY;
 	mouseX = event.clientX;// - windowHalfX;
 	mouseY = event.clientY;// - windowHalfX;
@@ -1018,7 +1088,8 @@ function onDocumentTouchStart( event ) {
 
 	if ( event.touches.length === 1 ) {
 
-		event.preventDefault();
+		if (this_active)//preventdefault)
+             event.preventDefault();
 		mouseX=event.touches[ 0 ].pageX;
 		mouseY=event.touches[ 0 ].pageY;
 		//mouseXOnMouseDown = event.touches[ 0 ].pageX - windowHalfX;
@@ -1029,8 +1100,8 @@ function onDocumentTouchStart( event ) {
 function onDocumentTouchMove( event ) {
 
 	if ( event.touches.length === 1 ) {
-
-		event.preventDefault();
+		if (this_active)//preventdefault)
+			event.preventDefault();
 
 		//mouseX = event.touches[ 0 ].pageX;//- windowHalfX;
 		targetRotationX =  mouseX-event.touches[ 0 ].pageX;//targetRotationOnMouseDown + ( mouseX - mouseXOnMouseDown ) * 0.05;
@@ -1043,6 +1114,7 @@ function onDocumentTouchMove( event ) {
 			
 OPENWORLD.Touchscreen = function()
 {
+	//this._active=true;
 	document.addEventListener( 'mousedown', onDocumentMouseDown, false );
 	document.addEventListener( 'touchstart', onDocumentTouchStart, false );
 	document.addEventListener( 'touchmove', onDocumentTouchMove, false );

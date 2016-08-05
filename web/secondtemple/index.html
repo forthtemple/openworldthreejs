@@ -5,7 +5,7 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<style>
-			body {
+			body{
 				color: #000;
 				font-family:Arial;
 				font-size:18px;
@@ -14,11 +14,22 @@
 				margin: 0px;
 				overflow: hidden;
 			}
-
+			input {
+				color: grey;
+				font-family:Arial;
+				font-size:18px;
+				itext-align:center;
+				ibackground-color: #fff;
+				background-color:rgba(0,0,0,0);
+				margin: 0px;
+				overflow: hidden;
+			}
 			#info {
 				position: absolute;
+				float:right;
 				padding: 0px;
-				width: 100%;
+				iwidth: 100%;
+				right:0px;
 				text-align: right;
 				color: grey;
 			}
@@ -54,32 +65,89 @@
 				width:50px;
 				height:10px;
 				margin-top:10px;
-			}			
+			}		
+
+			#messages {
+				position:fixed; 
+				bottom:0; 
+				/*width:200px;*//*100%; */
+				/*text-align:right;*/
+				color:grey;
+				margin-bottom:10px;
+			}	
+			#nameoverlay {
+			    display:none;
+			    position: absolute;
+			    margin-bottom:100px;
+			   imargin-right:10px;
+			    ifloat:right;
+			    right: 0px;
+			    iitop: 0px;
+			    width:315px;
+			    height:90px;
+			    iwidth:100%;
+			    iheight:100%;
+			    text-align:center;
+			    ibackground:white;
+			    border: solid 2px grey;
+			 }
+
 			
 		</style>
 	</head>
 
 	<body>
 		<div id="info">
-			<b><span dir="rtl" xml:lang="he" lang="he">בֵּית־הַמִּקְדָּשׁ הַשֵּׁנִי</span></b><br>
-			<span id="info2">
-			<b>Second Temple</b><br>
-			Use arrows to move<br>
-			Mouse for camera
-			</span>
-			<div> 
-				<img src="icons/config.png"  id="config" style="margin-right:5px" />
-				<div style="display:none" id="configdiv">
-					<a href="http://www.forthtemple.com">Forth Temple</a><br>
-					Get it on <a href="https://github.com/forthtemple/openworldthreejs">Github</a>
-				</div>
-				<div   style="display:none" id="fly">
-					<br><br>
-					<img src="icons/arrow.png"  id="flyup"  /><br>
-					<img src="icons/wings.png"  iid="fly" /><br>
-					<img src="icons/arrow.png"  id="flydown"  style="-moz-transform: scaleY(-1); -o-transform: scaleY(-1);  -webkit-transform: scaleY(-1); transform: scaleY(-1);  filter: FlipV;   -ms-filter: 'FlipV';"/>
-				</div>
+			<div id="title">
+				<b><span dir="rtl" xml:lang="he" lang="he">בֵּית־הַמִּקְדָּשׁ הַשֵּׁנִי</span></b><br>
+				<span id="info2">
+				<b>Second Temple</b><br>
+				Use arrows to move<br>
+				Mouse for camera
+				</span>
 			</div>
+			<div id="configall" style="margin-top:2px">	   
+			    <img src="icons/disconnect.png"  id="disconnect" style="display:none"/>
+				<img src="icons/config.png"  id="config" style="margin-right:0px" />
+				<div style="display:none; margin-bottom:7px" id="configdiv">
+					<a href="#" onclick="var win = window.open('http://www.forthtemple.com', '_blank'); ">Forth Temple</a><br>
+					Get it on <a href="#" onclick="var win = window.open('https://github.com/forthtemple/openworldthreejs', '_blank'); ">Github</a><br>
+
+					<input type="button" value="Fullscreen" id="fullscreen" style="margin-right:3px; font-size:10px; border:1px grey solid"/><br>					
+					<input type="button" value="Stats" id="stats" style="margin-right:3px; font-size:10px; border:1px grey solid"/>					
+
+				</div>
+            </div>
+
+			<div id="nameoverlay">
+				<input type="button" value="x" id="closename" style="float:right; font-size:10px"/>
+			     <br><div id="promptext">Enter you name: </div>
+			     <div id="nametext">
+			      		<input style="color:white; z-index: 1000;" type="text" id="name" value="Aral"  /> <input type="button" id="go" value="Go" istyle="ipadding-left:-15px; margin-left:-15px"/>
+			     </div>
+
+			</div>
+
+ 			<input type="button" id="connect" value="Connect" style="margin-top:3px; margin-right:2px"/><br>
+
+		 	<div id="actionbuttons" style="display:none">
+						<img src="icons/who.png"  id="who"  title="Who's playing"/>
+						<img src="icons/msg.png"  id="speak" title="Say something" />
+						<img src="icons/wave.png"  id="action" title="Wave at other players"/>
+			</div>			
+
+			<div id="wholist" style="iposition:absolute; right:0px; margin-top:20px">
+			</div>	
+
+			<div   style="display:none" id="fly">
+				<br><br>
+				<img src="icons/arrow.png"  id="flyup"  /><br>
+				<img src="icons/wings.png"  iid="fly" /><br>
+				<img src="icons/arrow.png"  id="flydown"  style="-moz-transform: scaleY(-1); -o-transform: scaleY(-1);  -webkit-transform: scaleY(-1); transform: scaleY(-1);  filter: FlipV;   -ms-filter: 'FlipV';"/>
+			</div>
+			
+		</div> <!--info-->
+		<div id="messages">
 		</div>
 		<div id="progress">
 			<span id="message" >Loading ...</span>
@@ -116,7 +184,7 @@
 			var osound=new OPENWORLD.Sound();
 			var otouchscreen;
 			
-			var fog=false;
+			//var fog=false;
 			
 			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
@@ -191,11 +259,107 @@
 			var umaterial;
 			
 			var sprites = [];
-			
+		
+		    var player_mixers = [];
+		    var player_mixers_removed =[];
 
-			init();
+		    var CS_NONE=0;
+		    var CS_GET_NAME=1;
+		    var CS_CONNECTING=2;
+		    var CS_CONNECTED=3;
+		    var connect_state=CS_NONE;
+
+		    var stats=0;
 			
-			animate();
+						
+			// function for drawing rounded rectangles
+			function roundRect(ctx, x, y, w, h, r) 
+			{
+				ctx.beginPath();
+				ctx.moveTo(x+r, y);
+				ctx.lineTo(x+w-r, y);
+				ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+				ctx.lineTo(x+w, y+h-r);
+				ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+				ctx.lineTo(x+r, y+h);
+				ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+				ctx.lineTo(x, y+r);
+				ctx.quadraticCurveTo(x, y, x+r, y);
+				ctx.closePath();
+				ctx.fill();
+				ctx.stroke();   
+			}		
+			// Alignment enums
+
+			THREE.SpriteAlignment = {};
+			THREE.SpriteAlignment.topLeft = new THREE.Vector2( 1, -1 );
+			THREE.SpriteAlignment.topCenter = new THREE.Vector2( 0, -1 );
+			THREE.SpriteAlignment.topRight = new THREE.Vector2( -1, -1 );
+			THREE.SpriteAlignment.centerLeft = new THREE.Vector2( 1, 0 );
+			THREE.SpriteAlignment.center = new THREE.Vector2( 0, 0 );
+			THREE.SpriteAlignment.centerRight = new THREE.Vector2( -1, 0 );
+			THREE.SpriteAlignment.bottomLeft = new THREE.Vector2( 1, 1 );
+			THREE.SpriteAlignment.bottomCenter = new THREE.Vector2( 0, 1 );
+			THREE.SpriteAlignment.bottomRight = new THREE.Vector2( -1, 1 );
+
+			// Make sprite above players head			
+			function makeTextSprite( message, parameters , textcolor)
+			{
+				if ( parameters === undefined ) parameters = {};
+				
+				var fontface = parameters.hasOwnProperty("fontface") ? 
+					parameters["fontface"] : "Arial";
+				
+				var fontsize = parameters.hasOwnProperty("fontsize") ? 
+					parameters["fontsize"] : 18;
+				
+				var borderThickness = parameters.hasOwnProperty("borderThickness") ? 
+					parameters["borderThickness"] : 4;
+				
+				var borderColor = parameters.hasOwnProperty("borderColor") ?
+					parameters["borderColor"] : { r:0, g:0, b:0, a:1.0 };
+				
+				var backgroundColor = parameters.hasOwnProperty("backgroundColor") ?
+					parameters["backgroundColor"] : { r:255, g:255, b:255, a:1.0 };
+
+				var spriteAlignment = THREE.SpriteAlignment.topLeft;
+					
+				var canvas = document.createElement('canvas');
+				var context = canvas.getContext('2d');
+				context.font = "Bold " + fontsize + "px " + fontface;
+			   // context.marginLeft="20px";
+				// get size data (height depends only on font size)
+				var metrics = context.measureText( message );
+				var textWidth = metrics.width;
+				
+				// background color
+				context.fillStyle   = "rgba(" + backgroundColor.r + "," + backgroundColor.g + ","
+											  + backgroundColor.b + "," + backgroundColor.a + ")";
+				// border color
+				context.strokeStyle = "rgba(" + borderColor.r + "," + borderColor.g + ","
+											  + borderColor.b + "," + borderColor.a + ")";
+
+				context.lineWidth = borderThickness;
+				roundRect(context, borderThickness/2, borderThickness/2, textWidth + borderThickness, fontsize * 1.4 + borderThickness, 6);
+				// 1.4 is extra height factor for text below baseline: g,j,p,q.
+				
+				// text color
+				context.fillStyle = textcolor;//"rgba(255, 255, 0, 1.0)";
+				//context.textAlign="center";
+				context.fillText( message, borderThickness+textWidth, fontsize + borderThickness);
+				
+				// canvas contents will be used for a texture
+				var texture = new THREE.Texture(canvas) 
+				texture.needsUpdate = true;
+
+				var spriteMaterial = new THREE.SpriteMaterial( 
+					{ map: texture, useScreenCoordinates: false, alignment: spriteAlignment } );
+				var sprite = new THREE.Sprite( spriteMaterial );
+				sprite.scale.set(100,50,1.0);
+				sprite.position.y=30;  
+				return sprite;	
+			}			
+						
 
 			function $( id ) {
 
@@ -211,9 +375,11 @@
 				mixershofar.clipAction( shofar.geometry.animations[2] ).reset();
 				mixershofar.clipAction( shofar.geometry.animations[2] ).clampWhenFinished=true;
 				mixershofar.addEventListener('finished',function(e){
-					sound1.play();
-					mixershofar.clipAction( shofar.geometry.animations[1] ).reset();
-					mixershofar.clipAction( shofar.geometry.animations[1] ).play();
+					if (connect_state!=CS_CONNECTED) {
+						sound1.play();
+						mixershofar.clipAction( shofar.geometry.animations[1] ).reset();
+						mixershofar.clipAction( shofar.geometry.animations[1] ).play();
+				    }
 				});  
 				if (!mixershofar2)
 					mixershofar2 = new THREE.AnimationMixer( shofar2 );
@@ -221,10 +387,12 @@
 				mixershofar2.clipAction( shofar2.geometry.animations[2] ).clampWhenFinished=true;
 				//this.clampWhenFinished
 				mixershofar2.addEventListener('finished',function(e){
+					if (connect_state!=CS_CONNECTED) {
 
 					//play('Idle',true);
-					mixershofar2.clipAction( shofar2.geometry.animations[1] ).reset();
-					mixershofar2.clipAction( shofar2.geometry.animations[1] ).play();
+						mixershofar2.clipAction( shofar2.geometry.animations[1] ).reset();
+						mixershofar2.clipAction( shofar2.geometry.animations[1] ).play();
+				    }
 				});	
 				if (sound1.isPlaying)
 					sound1.stop();
@@ -238,7 +406,7 @@
 					mixershofar.clipAction( shofar.geometry.animations[2] ).setDuration( 1 ).setLoop(THREE.LoopOnce).play();
 					mixershofar2.clipAction( shofar2.geometry.animations[2] ).setDuration( 0.9 ).setLoop(THREE.LoopOnce).play();
 					sound1.source.onended = function() {
-						if (templestate==TS_SHOFAR||templestate==TS_ARK) {
+						if (connect_state!=CS_CONNECTED&&(templestate==TS_SHOFAR||templestate==TS_ARK)) {
 							mixershofar.clipAction( shofar.geometry.animations[0] ).setDuration(0.95).setLoop(THREE.LoopOnce);//setEffectiveTimeScale(-1);
 							mixershofar.clipAction( shofar.geometry.animations[0] ).reset();
 							mixershofar.clipAction( shofar.geometry.animations[0] ).play();
@@ -253,7 +421,7 @@
 								mixershofar2.clipAction( shofar2.geometry.animations[3] ).play();
 							});		
 						}
-						this.isPlaying = false; /* sets Three wrapper property correctly */
+						this.isPlaying = false;  /* sets Three wrapper property correctly */
 					};
 					//sound1.play();
 				});				
@@ -267,6 +435,194 @@
 					$( "configdiv" ).style.display = "none";
 			}
 			
+			// Tell server waving
+			function action() {
+				camera._action="wave";
+			}
+
+			// Called when you click the connect/disconnect button
+			// if clicking connect then ask the users name
+			// if clicking disconnect then signal disconnect
+			function get_name()
+			{
+				if (connect_state==CS_CONNECTED) {
+	 				camera._disconnect=true;
+					//connect_state=CS_NONE;
+                } else {
+                	$("nametext").style.display="block";//visibility="visible";
+	  				$( "title").style.display="none";
+	  				                	//$("go").style.display="block";
+
+	   				//$("configall").style.marginTop="100px";//visibility="visible";
+
+	   				$("nameoverlay").style.display="block";//visibility="visible";
+                    var names=["Phannias","Mattathias","Joshua","Ananus","Joseph","Ishmael","Jonathan","Ananias","Josephus","Elioneus","Matthias","Simon","Theophilus","Eleazar","Joazer","Ananelus","Antigonus","Simeon","Jason","Onias","Johannan","Joiada","Eliashib","Joiakim","Ezra","Joshua" ];
+	   				$("name").focus();
+                    $("name").value='';
+		            $("name").value=names[Math.floor(Math.random()*names.length)];
+                    $("connect").style.display="none";
+	                $("messages").innerHTML="";
+	   				//$("name").selectStart=$("name").selectionEnd=$("name").value.length;
+
+	   				this_active=false;
+					connect_state=CS_GET_NAME;
+				}
+			}
+
+			// when hit that x to close the box
+			function closename()
+			{
+				$("nameoverlay").style.display="none";
+                $("connect").style.display="block";
+                $("connect").style.float="right";
+                $("nameoverlay").style.marginTop="40px";
+				$("actionbuttons").style.marginTop="40px";
+				this_active=true;
+				if (connect_state!=CS_CONNECTED) 
+					connect_state=CS_NONE;
+
+			}
+			
+			// Stop all animations on character
+			function animationstop(mixer)
+			{
+				for (j=0; j<mixer._root.geometry.animations.length; j++) {
+					mixer.clipAction( mixer._root.geometry.animations[j] ).stop();
+					mixer.clipAction( mixer._root.geometry.animations[j] ).reset();
+				}
+
+			}
+			
+			// This is when you click the 'go' button in name so can be either entering your name or entering a message
+			// Should really be two functions
+			function connect()
+			{
+				// this is bad, 'go' should have different handlers
+				if (connect_state==CS_CONNECTED) {
+					msg();
+				} else {
+					this_active=true;
+	   				//el.style.visibility =  "hidden";
+	  				$( "who" ).style.visibility="visible";
+	  				$( "speak" ).style.visibility="visible";
+
+	  				//$("connect").value="Disconnect";//style.visibility="hidden";
+	 				$("promptext").innerHTML="Connecting...";
+	 				camera._name=$("name").value;
+	 				$("name").blur();
+	 				$("nametext").style.display="none";
+ 				    //$("go").style.display="none";
+
+	 				msgs=[];
+	 				whos=[];
+					for (i=0; i<player_mixers.length; i++) {
+						animationstop(player_mixers[i]);
+						player_mixers[i].clipAction( player_mixers[i]._root.geometry.animations[3] ).setDuration(3).play();
+
+					}
+
+	  				connect_state=CS_CONNECTING;
+	  			}	
+			}
+
+			// Change layout and stop polling server
+			function disconnect()
+			{
+				   	$("nameoverlay").style.display="none";//visibility="hidden";
+	  				$("connect").value="Connect";//style.visibility="hidden";
+	 				$("promptext").innerHTML="Enter Name";
+	 				$("actionbuttons").style.display="none";
+	 				$("wholist").innerHTML="";
+	 				connect_state=CS_NONE;
+
+			}
+
+			// Once has connected to server change layout
+			function has_connected()
+			{
+				$("nameoverlay").style.display="none"; 
+				$("action").style.display="block"; 
+				$("action").style.float="right"; 
+				$("actionbuttons").style.display="block";
+			    $("actionbuttons").style.marginTop="25px";//visibility="visible";
+			    $("connect").style.display="block";
+			    $("promptext").innerHTML="Enter message:"
+	 			$("nametext").style.display="block";
+	 			$("name").value="";
+
+			    $("connect").style.right='0px';
+			    $("connect").style.position='absolute';
+	  			$("connect").value="Disconnect";//style.visibility="hidden";
+
+
+			}
+			
+			// Message to server
+			function speak()
+			{
+				this_active=false;
+				$("actionbuttons").style.marginTop="125px";
+				$("nameoverlay").style.marginTop="40px";
+   				$("nameoverlay").style.display="block";//visibility="visible";
+   				$("name").focus();
+			}
+			
+			// Tell server to list who's on
+			function who()
+			{
+				camera._who=true;
+			}
+
+			function msg()
+			{
+ 				this_active=true;
+ 				$("name").blur();// get rid of smart phone keyboard
+				$("actionbuttons").style.marginTop="40px";
+				//joystick._active=false;
+				//otouchscreen._active=false;
+				camera._msg.push($("name").value);
+				$("name").value="";
+				$("nameoverlay").style.marginTop="40px";
+				$("nameoverlay").style.display="none";//visibility="hidden";
+
+			}
+
+			function fog()
+			{
+				scene.fog = new THREE.Fog( 0xffffff, 1, 4 );	
+			}
+
+			// Make fullscreen
+			function fullscreen()
+			{
+				var el = document.documentElement
+					    , rfs = // for newer Webkit and Firefox
+					           el.requestFullScreen
+					        || el.webkitRequestFullScreen
+					        || el.mozRequestFullScreen
+					        || el.msRequestFullscreen
+					;
+				if(typeof rfs!="undefined" && rfs)
+				  rfs.call(el);
+			
+			}
+
+			function statsshow()
+			{
+				if (stats) {
+					container.removeChild(stats.dom);
+					stats=null;
+				} else {
+					stats = new Stats();
+					container.appendChild( stats.dom );
+			    }
+
+			}
+
+			init();
+			
+			animate();
+			
 			function init() {
 			
 
@@ -278,12 +634,17 @@
 				camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 2000000 );
 				camera.eulerOrder = "YXZ";
 
+				camera._msg=[];
+				camera._action="";
+				camera._who=0;
+				camera._disconnect=0;
 				// SCENE
 				scene = new THREE.Scene();
-				if (fog)
-					scene.fog = new THREE.Fog( 0xffffff, 1000, 4000 );	
+				camera.position.y=999;
+				//if (fog)
+				//	scene.fog = new THREE.Fog( 0xffffff, 1000, 4000 );	
 				scene.add( camera );
-
+                //camera.position.y=100000;
 				// LIGHTS
 
 				scene.add( new THREE.AmbientLight( 0x222222 ) );
@@ -370,6 +731,40 @@
 						$( "config" ).addEventListener( 'touchstart', config);
 						$( "config" ).addEventListener( 'click', config);
 
+						$( "action" ).addEventListener( 'touchstart', action);
+						$( "action" ).addEventListener( 'click', action);
+
+						$( "who" ).addEventListener( 'touchstart', who);
+						$( "who" ).addEventListener( 'click', who);
+						$( "who" ).style.visibility="hidden";
+						$( "connect" ).addEventListener( 'touchstart', get_name);
+						$( "connect" ).addEventListener( 'click', get_name);
+						$( "speak" ).style.visibility="hidden";
+						$( "speak" ).addEventListener( 'touchstart', speak);
+						$( "speak" ).addEventListener( 'click', speak);
+						$( "closename" ).addEventListener( 'touchstart', closename);
+						$( "closename" ).addEventListener( 'click', closename);
+						$( "go" ).addEventListener( 'touchstart', connect);
+						$( "go" ).addEventListener( 'click', connect);
+						//$( "fog" ).addEventListener( 'change', fog);
+						$( "fullscreen" ).addEventListener( 'touchstart', fullscreen);
+						$( "fullscreen" ).addEventListener( 'click', fullscreen);
+						$( "stats" ).addEventListener( 'touchstart', statsshow);
+						$( "stats" ).addEventListener( 'click', statsshow);
+
+					    $("name").onkeypress= function(e){
+							if (!e) e=window.event;
+							var keyCode = e.keyCode || e.which;
+							if (keyCode=='13') {
+								////alert('voot');
+								if (connect_state==CS_GET_NAME)
+									connect();
+							    else
+							    	msg();
+								return false;
+							}
+						}
+	
 						// Light up the temple with spotlight				
 						light = new THREE.SpotLight(0xffffff);
 						light.intensity  = 2;
@@ -405,27 +800,37 @@
 						
 						// Show the two shofars
 						var geometry = new THREE.PlaneBufferGeometry( 16000, 16000 );
-						var material = new THREE.MeshPhongMaterial( { emissive: 0x220000 } );
+						//var material = new THREE.MeshPhongMaterial( { emissive: 0x220000 } );
 						var loader = new THREE.JSONLoader();
 
 						loader.load( "actors/shofar/shofar.json", function ( geometry, materials ) {
 						
 							for ( var k in materials ) {
 								materials[k].skinning = true;
+
 							}
+
 							shofar = new THREE.SkinnedMesh(geometry,new THREE.MultiMaterial(materials));
+
 							shofar.scale.set( 0.004, 0.004, 0.004);
 							// 
 							space.worldToLocalSurfaceObj(shofar,7.7,2,0.14);//3.42);
 							shofar.skeleton.useVertexTexture = false;					
 							shofar2=shofar.clone();
+							texture=THREE.ImageUtils.loadTexture("actors/shofar/shofar2.jpg");
+							shofar2.material=shofar.material.clone();
+							shofar2.material.materials[0]=new THREE.MeshLambertMaterial({map:texture});
+							shofar2.material.materials[0].skinning=true;									
 							space.objTurn(shofar,180);
 							scene.add( shofar );	
+
+
 							space.worldToLocalSurfaceObj(shofar2,7.7,0.7,0.14);//3.42);							
 							space.objTurn(shofar2,0);
 							scene.add( shofar2 );	
-							
                             animateShofar();
+							player_mixers.push(mixershofar);
+							player_mixers.push(mixershofar2);
 								
 							// Put a spot light on both shofars
 							lightshofar = new THREE.SpotLight(0xffffff);//PointLight(0xffffff)
@@ -608,13 +1013,16 @@
 			function animate() {
 			
 				requestAnimationFrame( animate );
-				
+
 				if (space) {
 					prevlocalx=camera.position.x;
 					prevlocaly=camera.position.y;
 					prevlocalz=camera.position.z;
 					frameTime = clock.getDelta();
-					
+					if (connect_state==CS_CONNECTED) {
+						for (i=0; i<player_mixers.length; i++)
+							player_mixers[i].update(frameTime);
+					}					
 					var Worldpos=space.localToWorldObj(camera);
 					if (templestate==TS_SHOFAR) {
 						if (mixershofar) {
@@ -898,7 +1306,8 @@
 			var inc=0;
 			
 			function render() {
-
+				if (stats)
+                	stats.update();
 				var delta = clock.getDelta();
 
 				// Test hit a wall and if so go back
@@ -916,10 +1325,9 @@
 						if (dostop){
 							camera.position.x=prevlocalx;
 							camera.position.z=prevlocalz;
+						} else {
+
 						}
-							
-							//}
-						//}
 
 					} else {
 						prevlocalx=-1;
@@ -935,7 +1343,310 @@
 				inc++;
 			}
 
-		</script>
+
+	
+var poll=1000;  // How often you poll the server
+var msgs=[];
+var max_message=5;  // How many messages you show
+var whos=[];
+
+var removed_horn=false;
+
+// Remove the horn from the shofar
+// Is the first 89 faces
+function remove_horn(obj)
+{
+	for (i=0; i<89; i++) {
+
+	    obj.geometry.faces.shift();
+	    obj.geometry.faces.shift();
+	    obj.geometry.faceVertexUvs[0].shift();
+	    obj.geometry.faceVertexUvs[0].shift();
+	}
+	//obj.geometry.verticesNeedUpdate=true;
+	obj.geometry.elementsNeedUpdate=true;
+	//obj.geometry.uvsNeedUpdate=true;
+}
+
+// from the seed of the username get a repeatable random color
+function colorFromName(text)
+{
+	var seed=0;
+	for (kk=0; kk<text.length; kk++) {
+		seed+=(kk+1)*text.charCodeAt(kk);
+	}
+	var letters='0123456789ABCDEF';
+	var color='#';
+	for (var i=0; i<6; i++) {
+	    var x = Math.sin(seed++) * 10000;
+	    var rand= x - Math.floor(x);
+        //alert(rand);
+		color+=letters[Math.floor(rand*16)];
+	}
+	return color;
+}
+
+var lastconnection=-1;
+
+setInterval(function(){
+
+	if (space&&connect_state==CS_CONNECTED||connect_state==CS_CONNECTING) {
+		var pos=space.localToWorldObj(camera);
+
+        var commands=[];
+        if (camera._who)
+        	commands.push("who");
+        if (camera._disconnect)
+        	commands.push("disconnect");
+        if (connect_state==CS_CONNECTING)
+        	commands.push("connecting");
+        for (i=0; i<camera._msg.length; i++)
+        	camera._msg[i]=camera._name+" says:"+camera._msg[i];
+		var position= [{  
+		    "name" : camera._name,
+		    "x" : pos.x ,
+		    "y" : pos.y ,
+		    "z" : 0 ,
+		    "turn": space.getObjTurn(camera),
+		    "action": camera._action,
+		    "msg": camera._msg,
+		    "commands": commands
+		   // "who": camera._who,
+           // "disconnect": camera._disconnect
+		}]; 
+		if (camera._disconnect) {
+			disconnect();
+
+		}
+		camera._action="";
+		camera._msg=[];
+		camera._who=0;
+		camera._disconnect=0;
+		// If over 10 seconds that got a response from server then display disconnect icon
+		if (connect_state==CS_CONNECTED&&lastconnection>0&&system.currentMilliseconds()-lastconnection>10000)
+			$("disconnect").style.display="inline";
+		else
+			$("disconnect").style.display="none";
+		// commands who, connect, disconnect
+		// Why do I need to do this when I call remove_horn?
+		shofar.geometry.elementsNeedUpdate=false;
+		var xmlhttp=new XMLHttpRequest();
+		xmlhttp.onreadystatechange =function()
+		{
+			if (xmlhttp.readyState==4 && xmlhttp.status!=200) {
+	
+			} else if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+				if (xmlhttp.responseText=="") {
+					return; 
+				}
+				lastconnection=system.currentMilliseconds();
+
+				if (connect_state==CS_CONNECTING) {
+					// user has connected
+					connect_state=CS_CONNECTED;
+					$("promptext").innerHTML="Connected";
+					setTimeout(has_connected(),1000);
+
+					if (!removed_horn) {
+						remove_horn(shofar);
+						//remove_horn(shofar2);
+						removed_horn=true;
+					}
+					//
+				}
+				try {
+                	ret=JSON.parse(xmlhttp.responseText);
+                } catch(e) {
+                	alert(e+" "+xmlhttp.responseText);
+                }
+                data=ret["users"];
+				
+				if (ret["who"]) {
+					whos=ret["who"];
+				}
+				// Move to where the server says to if told to
+				if (ret["player_pos"]) {
+					space.worldToLocalSurfaceObj(camera,ret["player_pos"][0],ret["player_pos"][1],cameraoffset);
+				}
+				color=colorFromName(camera._name);
+				$("wholist").innerHTML="You: <span style='color:"+color+"'>"+camera._name+"</span><br>"+
+				                       "Num Playing :"+ret["num_players"];//html(
+				if (whos.length>0) {
+					$("wholist").innerHTML+= "<br>Players on:<br>"
+					for (i=0; i<whos.length; i++) {
+						color=colorFromName(whos[i]);
+
+						$("wholist").innerHTML+= "<div style='color:"+color+"'>"+whos[i]+"</div>";//<br>";
+
+					}
+				}
+
+				msgs=msgs.concat(ret["msg"]);
+				if (msgs.length>max_message) {
+					msgs.splice(0,msgs.length-max_message-1);
+
+				}
+				// if a player is no longer on the server remove them
+				for (i=player_mixers.length-1; i>=0; i--) {
+					var gone=true;
+					for (j=0; j<data.length; j++) {
+						if (player_mixers[i]._userid==data[j][0])
+							gone=false;
+					}
+
+					if (gone){//player_mixers[i]._gone) {
+						scene.remove(player_mixers[i]._root);
+						player_mixers_removed.push(player_mixers[i]);
+						player_mixers.splice(i,1);
+					}
+
+				}
+
+				for (i=0; i<data.length; i++) {
+					// go through each player from server
+					var player;
+					// find the player in your list of current players
+					var found_player=false;
+					for (j=0; j<player_mixers.length; j++) {
+						if (player_mixers[j]._userid==data[i][0]||!player_mixers[j]._userid) {
+							player=player_mixers[j];
+							if (player_mixers[j]._userid==data[i][0])
+								found_player=true;
+						}
+					}
+					// if cant find the player either reuse a removed player or create a new one
+					if (!player) {
+						if (player_mixers_removed.length>0) {
+							// reuse an old player if one around
+							player=player_mixers_removed[0];
+
+							player_mixers_removed.splice(0,1);
+						} else  {
+							//alert('clone');
+							var _has_name;
+							if ((player_mixers.length) % 3==0) {
+								//shofar.remove(player_mixers[0]._has_name); // so dont get two - add and delete sprite
+								player_model=shofar.clone();
+								//shofar.add(player_mixers[0]._has_name);
+
+							} else if ((player_mixers.length) % 3==1) {
+							   // shofar2.remove(player_mixers[1]._has_name); // so dont get two - add and delete sprite
+								player_model=shofar2.clone();
+								//shofar2.add(player_mixers[1]._has_name);
+							} else  {
+								if (player_mixers.length==2) {
+								  //  shofar.remove(player_mixers[0]._has_name); // so dont get two - add and delete 
+									player_model=shofar.clone();
+     								//shofar.add(player_mixers[0]._has_name);
+									texture=THREE.ImageUtils.loadTexture("actors/shofar/shofar3.jpg");
+									player_model.material=shofar.material.clone();
+									player_model.material.materials[0]=new THREE.MeshLambertMaterial({map:texture});
+									player_model.material.materials[0].skinning=true;
+							    } else 
+							    	player_model=player_mixers[2].clone();
+							}
+							player = new THREE.AnimationMixer( player_model);
+						}
+						scene.add(player._root);
+						player_mixers.push(player);
+					}
+					var changed_sprite=false;
+					if (!found_player||player._name!=data[i][1]) {
+						// If reusing old player then remove old name 
+						for (kk=player._root.children.length-1; kk>=0; kk--)
+							if (player._root.children[kk] instanceof THREE.Sprite)
+								player._root.remove(player._root.children[kk]);
+
+						color=colorFromName(data[i][1]);
+						var spritey = makeTextSprite( data[i][1], 
+							{ fontsize: 24, borderColor: {r:0, g:0, b:0, a:0}, backgroundColor: {r:55, g:00, b:00, a:0} },color );
+
+					
+						player._root.add( spritey );
+						player._has_name=spritey;
+						changed_sprite=true;
+
+					}
+
+                    x=parseFloat(data[i][2]);
+                    y=parseFloat(data[i][3]);
+                    z=parseFloat(data[i][4]);
+                    playerpos=space.localToWorldObj(player._root);
+                    player._userid=data[i][0];
+                    player._name=data[i][1];
+					if (!changed_sprite) {
+						// if existing player has moved then lerp the player to the new location
+	                    var stopdist=0.01;
+	                    dist=omath.vectorDistance(new THREE.Vector3(x,y,0.14),playerpos);
+	                    if (dist>stopdist&&!player._isWalking) {
+	                    	player._isWalking=true;
+							player.clipAction( player._root.geometry.animations[3] ).stop();
+							player.clipAction( player._root.geometry.animations[4] ).reset();
+							player.clipAction( player._root.geometry.animations[4] ).play();
+
+						} else if (dist<stopdist&&player._isWalking) {
+	                    	player._isWalking=false;
+							player.clipAction( player._root.geometry.animations[4] ).stop();
+							player.clipAction( player._root.geometry.animations[3] ).reset();
+							player.clipAction( player._root.geometry.animations[3] ).play();
+
+						}
+						space.worldToLocalSurfaceObjLerp(player._root,x,y,0.14,poll/1000);
+				    } else {
+				    	// if player has entered the game then move them straight there
+				    	animationstop(player);
+
+				    	//player.clipAction( player._root.geometry.animations[3] ).reset();
+						player.clipAction( player._root.geometry.animations[3] ).play();
+						space.worldToLocalSurfaceObj(player._root,x,y,0.14);
+				    }
+
+					action=data[i][6];
+                    if (action=="wave") {
+                    	player._isWalking=false;
+                    	animationstop(player);
+						player.clipAction( player._root.geometry.animations[5] ).setDuration(2).setLoop(THREE.LoopOnce).play();
+						player.addEventListener('finished',function(e){
+							player.clipAction( player._root.geometry.animations[3] ).reset();
+							player.clipAction( player._root.geometry.animations[3] ).play();
+						});							
+
+                    }
+					var turn=parseFloat(data[i][5]);
+					space.objTurn(player._root,turn);
+					
+				}
+
+				var msglines="";
+				for (i=0; i<msgs.length; i++) {
+					if (msgs[i][0]>=0) {
+						var usename="";
+						for (j=0; j<player_mixers.length; j++)
+							if (player_mixers[j]._userid==msgs[i][0])
+								usename=player_mixers[j]._name;
+						if (!usename)
+							usename=camera._name; // if cannot find on a player must be the user himself
+						color=colorFromName(usename);
+						msglines=msglines+"<span style='color:"+color+"'>"+msgs[i][1]+"</span><br>";
+	
+					} else 
+						msglines=msglines+msgs[i][1]+"<br>";
+				}
+				$("messages").innerHTML=msglines;
+
+			}
+		}
+		xmlhttp.open("POST","server/secondtemple.php",true);
+		xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		xmlhttp.setRequestHeader("Cache-Control","no-cache");
+		xmlhttp.send("position=" +JSON.stringify(position));
+
+	}
+}, poll);	
+	
+
+	
+</script>
 
 	</body>
 </html>
