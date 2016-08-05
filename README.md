@@ -3,7 +3,7 @@ A minimalistic framework to make it easier creating an multi user open world wit
 
 To demonstrate the framework, a demo had be made for the Second Temple, the temple that was at the center of judaism before 77AD. It is where the dome of the rock currently stands on the temple mount in Jerusalem. In the demo you can explore the Second Temple. This framework also includes the original blender models for the temple and the actors in the demo. It also demonstrates the multi user server. The demo should work on smartphone browsers (tested on iPhone and iPad 9.3) and desktops.
 
-Live Demo http://www.secondtemple.org
+Live Demo http://www.secondtemple.org  
 Click 'connect' to connect to the server
 
 ![alt tag](http://secondtemple.org/screenshots/temple200.jpg)  ![alt tag](http://secondtemple.org/screenshots/templeiii200.jpg)
