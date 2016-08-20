@@ -7,6 +7,8 @@ Live Demo http://www.secondtemple.org
 
 Click 'connect' to connect to the server
 
+Also demo at http://www.rhodes3d.com  (work in progress)
+
 ![alt tag](http://secondtemple.org/screenshots/temple200.jpg)  ![alt tag](http://secondtemple.org/screenshots/templeiii200.jpg)
 
 **Installation**  
