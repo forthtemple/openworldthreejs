@@ -3,11 +3,11 @@ A minimalistic framework to make it easier creating an multi user open world wit
 
 To demonstrate the framework, a demo has been made for the Second Temple, the temple that was at the center of judaism before 77AD. It is where the dome of the rock currently stands on the temple mount in Jerusalem. In the demo you can explore the Second Temple. This framework also includes the original blender models for the temple and the actors in the demo. It also demonstrates a multi user server. The demo should work on smartphone browsers (tested on iPhone and iPad 9.3) and desktops.
 
-Live Demo http://www.secondtemple.org  
+Live Demo http://www.forthtemple.com/secondtemple
 
 Click 'connect' to connect to the server
 
-![alt tag](http://secondtemple.org/screenshots/temple200.jpg)  ![alt tag](http://secondtemple.org/screenshots/templeiii200.jpg)
+![alt tag](http://www.forthtemple.com/secondtemple/screenshots/temple200.jpg)  ![alt tag](http://www.forthtemple.com/secondtemple/screenshots/templeiii200.jpg)
 
 Also demo at http://www.rhodes3d.com  (work in progress)
 
@@ -30,19 +30,19 @@ All the models in the demos are created using Blender. There are included in the
 
 If you open /models/secondtemple/temple/temple.blend notice the multiple meshes. Notice that some have the word wall and some surface in them.
 
-![alt tag](http://secondtemple.org/screenshots/wallsurface.jpg) 
+![alt tag](http://www.forthtemple.com/secondtemple/screenshots/wallsurface.jpg) 
 
 A surface mesh will be intersected by the open world framework to determine the ground. Walls are also detected to stop players walking through walls. Also notice the units of distance in the blender model are around about 1 meter. Also Z is up. Also some meshes are hidden in order to reduce the size. To export the temple.blend model to obj, select all the meshes you wish to export (will exclude the hidden ones) and then export the obj and then click on 'selection only' to only export the selected meshes.
 
-![alt tag](http://secondtemple.org/screenshots/exportobj.jpg) 
+![alt tag](http://www.forthtemple.com/secondtemple/screenshots/exportobj.jpg) 
 
 To export an actor like a priest (/models/secondtemple/priest/priest.blend) to json make sure the Blender export io_three is placed under the directory Blender\2.xx\scripts\addons. Exporting to json can be fiddly where you must first select the mesh you wish to export like selecting body below:
 
-![alt tag](http://secondtemple.org/screenshots/jsonselectmesh.jpg) 
+![alt tag](http://www.forthtemple.com/secondtemple/screenshots/jsonselectmesh.jpg) 
 
 And then when you export to json you must specify all the correct flags once to export so that it is not missing animation, bone, texture information. These are the ones that work:
 
-![alt tag](http://secondtemple.org/screenshots/exportjsonsmall.jpg) 
+![alt tag](http://www.forthtemple.com/secondtemple/screenshots/exportjsonsmall.jpg) 
 
 **Server**  
 The server is written in pure PHP and MySQL with no dependencies. MySQL is used to hold the player positions and also includes messaging. Every second a player polls the server giving the server via json the players position. In return the server gives player positions in the players vicinity and also any messages from players. There is tests for player abuse, such as polling much more often or giving false positions, but this could easily be added in the future.
