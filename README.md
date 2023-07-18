@@ -11,7 +11,7 @@ Click 'connect' to connect to the server
 
 
 **Installation**  
-Unzip the distrubution and then double click index.html under /web/secondtemple
+If you unzip the distrubution under your webserver root then browsing http://localhost/openworldthreejs/web/secondtemple/ show display the Second Temple.
 
 For instructions on setting up the server refer to the server section at the end.
 
