@@ -9,8 +9,6 @@ Click 'connect' to connect to the server
 
 ![alt tag](http://www.forthtemple.com/secondtemple/screenshots/temple200.jpg)  ![alt tag](http://www.forthtemple.com/secondtemple/screenshots/templeiii200.jpg)
 
-Also demo at http://www.rhodes3d.com  (work in progress)
-
 
 **Installation**  
 Unzip the distrubution and then double click index.html under /web/secondtemple
