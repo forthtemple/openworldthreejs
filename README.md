@@ -1,5 +1,7 @@
 # Open World for threejs
-A minimalistic framework to make it easier creating an multi user open world with threejs for both smartphones and desktops
+A minimalistic framework to make it easier creating an multi user open world with threejs for both smartphones and desktops. 
+
+Note, there is a new <a href='https://github.com/forthtemple/openworlddart'>dart/flutter</a> version based upon this framework. The new repository has native iOS and Android apps as opposed to this framework which is web only.
 
 To demonstrate the framework, a demo has been made for the Second Temple, the temple that was at the center of judaism before 77AD. It is where the dome of the rock currently stands on the temple mount in Jerusalem. In the demo you can explore the Second Temple. This framework also includes the original blender models for the temple and the actors in the demo. It also demonstrates a multi user server. The demo should work on smartphone browsers (tested on iPhone and iPad 9.3) and desktops.
 
