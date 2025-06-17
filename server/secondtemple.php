@@ -42,7 +42,7 @@ function game_action()
 	}
 }
 
-include_once "base_server.php";
 
+include_once "base_server.php";
 
 ?>
