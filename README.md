@@ -5,7 +5,7 @@ Note, there is a new <a href='https://github.com/forthtemple/openworlddart'>dart
 
 To demonstrate the framework, a demo has been made for the Second Temple, the temple that was at the center of judaism before 77AD. It is where the dome of the rock currently stands on the temple mount in Jerusalem. In the demo you can explore the Second Temple. This framework also includes the original blender models for the temple and the actors in the demo. It also demonstrates a multi user server. The demo should work on smartphone browsers (tested on iPhone and iPad 9.3) and desktops.
 
-Live Demo http://www.forthtemple.com/secondtemple
+Live Demo https://www.forthtemple.com/secondtemple
 
 Click 'connect' to connect to the server
 
